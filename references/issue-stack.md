@@ -1,0 +1,70 @@
+# Issue Stack
+
+## Local Authority Status
+
+Primary local authority lives in:
+
+- `../core/issue-topology/issue-driven-mutation-stack.md`
+
+Use this reference for supporting doctrine and comparison depth.
+
+If the native local file and this reference disagree, prefer the local file.
+
+Use this module when the work mutates code, docs, workflow seeds, or runtime
+governance and the issue lane must be visible as a first-class workflow stack.
+
+## Core Rule
+
+For mutating work, the issue stack is not optional process overhead. It is part
+of the execution model.
+
+## Stack
+
+- `accelerate`
+- `Issue Bootstrap Gate`
+- docs/TASKS.md + worklog.md
+- `linear-implementation-planner` when sequencing or parent/child structure is
+  non-trivial
+- planning artifact (`planning-with-files` or equivalent execution-ready plan)
+- `executing-plans` when the execution packet is accepted
+- `linear-progress-reporter` for longer runs
+- `worklog.md Stage Summary` before `Done`
+
+## Flow
+
+```text
+User Request
+  -> accelerate
+     -> mutating?
+        -> no  -> analysis path
+        -> yes -> Issue Bootstrap Gate
+                 -> missing issue     -> BLOCK
+                 -> existing issue    -> validate with docs/TASKS.md + worklog.md
+                 -> new issue needed  -> create with docs/TASKS.md + worklog.md
+                      -> planning gate
+                         -> missing plan -> BLOCK
+                         -> plan present -> execute
+                              -> QA / browser-proof / E2E
+                              -> worklog.md Stage Summary
+                              -> Done
+```
+
+## Required Visibility
+
+Issue-driven packets should make visible:
+
+- governing issue
+- issue lifecycle state
+- metadata completeness
+- next lifecycle gate
+- whether planning artifact already exists
+- whether the work is still blocked on issue/plan hygiene
+
+## Subagents In Issue-Driven Work
+
+If subagents are spawned:
+
+- they inherit the same governing issue
+- they do not invent parallel issue authority
+- each subagent returns a bounded implementation/review packet
+- the master remains accountable for final issue closure
