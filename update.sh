@@ -7,7 +7,8 @@
 #   curl -fsSL https://raw.githubusercontent.com/marcelokarval/helm/main/update.sh | bash
 #
 # Options:
-#   TARGET=path   Update specific installation
+#   TARGET=path       Update specific installation
+#   SKIP_BUNDLED=1    Skip bundled skills update
 # ============================================================================
 
 BLUE='\033[0;34m'
@@ -66,11 +67,18 @@ main() {
   info "Updating from $(dim "github.com/${HELM_REPO}")..."
   printf "\n"
 
-  # Reinstall with FORCE
-  TARGET="$target" FORCE=1 bash <(curl -fsSL "https://raw.githubusercontent.com/${HELM_REPO}/${HELM_BRANCH}/install.sh")
+  # Reinstall with FORCE (also updates bundled skills)
+  if [ "${SKIP_BUNDLED:-0}" = "1" ]; then
+    TARGET="$target" FORCE=1 SKIP_BUNDLED=1 bash <(curl -fsSL "https://raw.githubusercontent.com/${HELM_REPO}/${HELM_BRANCH}/install.sh")
+  else
+    TARGET="$target" FORCE=1 bash <(curl -fsSL "https://raw.githubusercontent.com/${HELM_REPO}/${HELM_BRANCH}/install.sh")
+  fi
 
   printf "\n"
   info "$(bold helm) updated successfully."
+  if [ "${SKIP_BUNDLED:-0}" != "1" ]; then
+    info "Bundled skills were also updated."
+  fi
   printf "\n"
 }
 

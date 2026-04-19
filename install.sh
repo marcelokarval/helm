@@ -7,10 +7,11 @@
 #   curl -fsSL https://raw.githubusercontent.com/marcelokarval/helm/main/install.sh | bash
 #
 # Options:
-#   TARGET=path   Install to specific directory (default: auto-detect)
-#   FORCE=1       Overwrite existing installation
-#   DRY_RUN=1     Show what would be done without executing
-#   QUIET=1       Suppress non-essential output
+#   TARGET=path       Install to specific directory (default: auto-detect)
+#   FORCE=1           Overwrite existing installation
+#   DRY_RUN=1         Show what would be done without executing
+#   QUIET=1           Suppress non-essential output
+#   SKIP_BUNDLED=1    Skip bundled skills installation
 #
 # Examples:
 #   curl -fsSL https://raw.githubusercontent.com/marcelokarval/helm/main/install.sh | bash
@@ -133,6 +134,8 @@ check_existing() {
 }
 
 # ── Download and install ────────────────────────────────────────────────────
+CLONED_DIR=""
+
 install_helm() {
   local target="$1"
 
@@ -166,10 +169,86 @@ install_helm() {
   fi
   run cp -r "$tmp_dir/helm" "$target"
 
-  # Cleanup temp
-  rm -rf "$tmp_dir"
+  # Save cloned dir for bundled skills (cleaned up later)
+  CLONED_DIR="$tmp_dir"
 
   success "Downloaded to $(dim "$target")"
+}
+
+# ── Install bundled skills ──────────────────────────────────────────────────
+install_bundled_skills() {
+  local target="$1"
+  local skills_dir
+  skills_dir="$(dirname "$target")"
+  local bundled_source="${CLONED_DIR}/helm/bundled-skills"
+
+  if [ "${SKIP_BUNDLED:-0}" = "1" ]; then
+    info "Skipping bundled skills (SKIP_BUNDLED=1)"
+    return
+  fi
+
+  if [ ! -d "$bundled_source" ]; then
+    info "No bundled-skills directory found — skipping"
+    return
+  fi
+
+  local installed=0
+  local skipped=0
+  local names=()
+
+  for skill_dir in "$bundled_source"/*/; do
+    [ -d "$skill_dir" ] || continue
+    local name
+    name="$(basename "$skill_dir")"
+    local dest="${skills_dir}/${name}"
+
+    # Skip if already exists with a SKILL.md (don't overwrite user's custom skills)
+    # Unless FORCE=1 (update mode) — then overwrite bundled skills
+    if [ -d "$dest" ] && [ -f "$dest/SKILL.md" ] && [ "${FORCE:-0}" != "1" ]; then
+      names+=("${name} (existing, skipped)")
+      skipped=$((skipped + 1))
+      continue
+    fi
+
+    # Check if it's a bundled skill before overwriting (only overwrite bundled, not user-created)
+    if [ -d "$dest" ] && [ -f "$dest/SKILL.md" ] && [ "${FORCE:-0}" = "1" ]; then
+      if grep -q 'origin: adapted-from' "$dest/SKILL.md" 2>/dev/null; then
+        # This is a bundled skill — safe to overwrite
+        run rm -rf "$dest"
+        run cp -r "$skill_dir" "$dest"
+        names+=("${name} (updated)")
+        installed=$((installed + 1))
+        success "Updated bundled skill: $(dim "${name}")"
+        continue
+      else
+        # User-created skill — don't overwrite
+        names+=("${name} (user custom, skipped)")
+        skipped=$((skipped + 1))
+        continue
+      fi
+    fi
+
+    # Copy the bundled skill
+    if [ -d "$dest" ]; then
+      run rm -rf "$dest"
+    fi
+    run cp -r "$skill_dir" "$dest"
+    names+=("${name}")
+    installed=$((installed + 1))
+    success "Installed bundled skill: $(dim "${name}")"
+  done
+
+  if [ ${#names[@]} -gt 0 ]; then
+    printf "\n"
+    info "Bundled skills: ${#names[@]} found, ${installed} installed, ${skipped} skipped"
+    for name in "${names[@]}"; do
+      dim "  • ${name}"
+      printf "\n"
+    done
+  fi
+
+  BUNDLED_INSTALLED=$installed
+  BUNDLED_SKIPPED=$skipped
 }
 
 # ── Configure enforcement (worklog reference) ──────────────────────────────
@@ -209,6 +288,9 @@ print_summary() {
 
   printf "\n"
   printf "${BOLD}${CYAN}  ⎈ helm v${HELM_VERSION} installed${NC}\n"
+  if [ "${SKIP_BUNDLED:-0}" != "1" ] && [ "${BUNDLED_INSTALLED:-0}" -gt 0 ]; then
+    printf "  ${DIM}+ %s bundled skill(s)${NC}\n" "$BUNDLED_INSTALLED"
+  fi
   printf "\n"
   printf "  ${DIM}Location${NC}    %s\n" "$target"
   printf "  ${DIM}Files${NC}       %s markdown modules\n" "$file_count"
@@ -256,6 +338,11 @@ main() {
     printf "\n"
     info "Would clone ${HELM_URL} (branch: ${HELM_BRANCH})"
     info "Would install to ${target}"
+    if [ "${SKIP_BUNDLED:-0}" != "1" ]; then
+      info "Would also install bundled skills to ${BOLD}$(dirname "$target")/${NC}"
+    else
+      info "Would skip bundled skills (SKIP_BUNDLED=1)"
+    fi
     info "Would configure worklog.md enforcement"
     printf "\n"
     printf "${DIM}Remove DRY_RUN=1 to execute.${NC}\n"
@@ -265,6 +352,13 @@ main() {
 
   check_existing "$target"
   install_helm "$target"
+  install_bundled_skills "$target"
+
+  # Cleanup cloned dir after bundled skills are installed
+  if [ -n "$CLONED_DIR" ] && [ -d "$CLONED_DIR" ]; then
+    rm -rf "$CLONED_DIR"
+  fi
+
   configure_worklog
   print_summary "$target"
 }

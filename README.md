@@ -259,17 +259,26 @@ is that the execution stays root-owned.
 
 `helm` should coexist well with these adjacent disciplines:
 
-- `napkin-discipline`
+- `napkin` (bundled)
   - keeps the recurring runbook and durable tactical guidance fresh
 - `prompt-hardening`
   - reinforces proper skill discovery and activation discipline via Skill tool
 
-They are recommended operating companions.
+### Bundled Skills
 
-They are not the semantic foundation of `helm`.
+The installer includes 7 companion skills adapted from [napkin](https://github.com/blader/napkin) (MIT) and [superpowers](https://github.com/obra/superpowers) (MIT):
 
-`helm` must still make correct control-plane decisions even if the user is
-not explicitly talking about those adjacent skills.
+| Skill | Purpose | Origin |
+|---|---|---|
+| **napkin** | Persistent per-project runbook — continuously curated memory | napkin |
+| **brainstorming** | Design-first workflow — no code before design approval | superpowers |
+| **writing-plans** | Bite-sized task decomposition with exact code, no placeholders | superpowers |
+| **subagent-driven-development** | Task dispatch + two-stage review via Task tool | superpowers |
+| **dispatching-parallel-agents** | Parallel subagent dispatch for independent problems | superpowers |
+| **systematic-debugging** | 4-phase root cause analysis before any fix | superpowers |
+| **verification-before-completion** | Evidence gate — no completion claims without verification | superpowers |
+
+These are installed to `skills/<name>/` alongside helm. They respect user customizations — the installer never overwrites an existing skill.
 
 ## Named Workflows And Calibration
 
