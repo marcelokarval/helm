@@ -26,10 +26,16 @@ is relevant and invoke it.
 
 ### Layer 2 — payload.message (active for cron jobs)
 When creating cron jobs (agentTurn or webDevReview), include explicit
-instructions in the `payload.message`:
+instructions in the `payload.message`. **See `adapters/runtime/cron-governance.md`
+for the full governance rules — crons must NEVER invent tasks or propose
+features.**
 
 ```
-"Before any work, read skills/helm/SKILL.md and follow the helm discipline:
+"Before any work, read skills/helm/SKILL.md and follow the helm discipline.
+Read docs/TASKS.md and execute only the next pending task.
+If no tasks are pending, STOP — do not invent work.
+
+For the task being executed:
 1. Classify the request (trivial vs non-trivial)
 2. Open the correct branch
 3. Follow proof stack in order

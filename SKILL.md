@@ -267,6 +267,10 @@ There are 2 cron payload kinds that drive continuous work:
 1. **agentTurn** — general-purpose agent turns; include explicit helm instructions in `payload.message`
 2. **webDevReview** — web development review turns; include explicit helm instructions in `payload.message`
 
+**CRITICAL:** The default system prompt for `webDevReview` includes dangerous autonomous instructions ("propose new requirements", "continue development autonomously"). These MUST be overridden with proper governance. See `adapters/runtime/cron-governance.md` for the mandatory rules and recommended `payload.message` templates.
+
+The foundational rule: **a cron MUST NEVER create, propose, or invent requirements.** Work must come from `docs/TASKS.md` or explicit human instructions. When no tasks are pending, the cron MUST stop.
+
 ### No Orchestrator/AGENTS.md Concept
 
 In the Z.ai platform, there is no separate orchestrator role. The master agent IS the orchestrator. There is no platform-level `AGENTS.md` file that the Z.ai runtime natively reads — the master agent reads `skills/helm/AGENTS.md` as a governed artifact, not as a platform-level agent configuration.
@@ -293,10 +297,14 @@ doesn't clearly match.
 ### Layer 2: `payload.message` (Active for Crons)
 
 When creating crons (`agentTurn` or `webDevReview`), include explicit instructions
-in the `payload.message`:
+in the `payload.message`. **Always follow the governance rules in
+`adapters/runtime/cron-governance.md`** — crons must never invent tasks or
+propose features.
 
 ```
-"Read skills/helm/SKILL.md and follow ALL instructions before any work."
+"Read skills/helm/SKILL.md and follow ALL instructions before any work.
+Read docs/TASKS.md and execute only the next pending task.
+If no tasks are pending, STOP — do not invent work."
 ```
 
 **When it works:** Crons are the primary mechanism for continuous automated work.
