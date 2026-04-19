@@ -9,7 +9,7 @@ description: >
   the most common debugging failure: applying random fixes without understanding the actual cause.
 metadata:
   category: debugging
-  origin: adapted-for-zai
+  origin: adapted-from-superpowers-for-zai
   version: 1.0.0
 ---
 # Systematic Debugging

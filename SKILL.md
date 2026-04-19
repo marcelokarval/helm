@@ -356,3 +356,44 @@ Use these native authorities first:
 
 Open `references/` only when native authority is still thin or when comparison
 against inherited doctrine is the point of the run.
+
+## Bundled Skills
+
+helm ships with 8 companion skills that extend the orchestration surface.
+These are installed alongside helm in `skills/<name>/`:
+
+| Skill | Category | Role |
+|-------|----------|------|
+| `brainstorming` | design-planning | MANDATORY before any creative work. Socratic design refinement producing design docs. |
+| `writing-plans` | implementation-planning | Creates bite-sized implementation plans (2-5 min tasks) with exact code and verification. |
+| `subagent-driven-dev` | delegation | Task dispatch with two-stage review (spec compliance + code quality). |
+| `dispatching-parallel-agents` | orchestration | For 2+ independent tasks — one agent per problem domain, all concurrent. |
+| `test-driven-development` | quality | Iron Law: NO production code without a failing test first. RED-GREEN-REFACTOR. |
+| `systematic-debugging` | debugging | 4-phase root cause analysis (evidence → pattern → hypothesis → fix). |
+| `verification-before-completion` | closure | Gate function: NO completion claims without fresh verification evidence. |
+| `napkin` | knowledge-management | Cross-session persistent memory — curated runbook of lessons learned. |
+
+### Pipeline Integration
+
+The bundled skills form a complete development pipeline:
+
+```
+brainstorming → writing-plans → [implementation with TDD] → verification-before-completion
+                                  ↓ (if bugs)
+                            systematic-debugging
+                                  ↓ (if complex)
+                    subagent-driven-dev + dispatching-parallel-agents
+                                  ↓ (across sessions)
+                                  napkin
+```
+
+- **Design phase**: `brainstorming` → produces design docs → consumed by `writing-plans`
+- **Planning phase**: `writing-plans` → produces task plans → executed by `subagent-driven-dev`
+- **Implementation**: `test-driven-development` governs code writing
+- **Quality**: `verification-before-completion` is the final gate before any "Done" claim
+- **Debugging**: `systematic-debugging` activates when bugs are encountered
+- **Delegation**: `subagent-driven-dev` + `dispatching-parallel-agents` handle multi-agent work
+- **Memory**: `napkin` accumulates lessons across sessions for continuous improvement
+
+All bundled skills reference `helm` as the orchestrator and are designed to be
+invoked by helm's classification and branch routing, not used in isolation.

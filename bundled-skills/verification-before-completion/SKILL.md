@@ -9,7 +9,7 @@ description: >
   checking. Use as the final gate before ANY "Done", "completed", or "finished" statement.
 metadata:
   category: closure
-  origin: adapted-for-zai
+  origin: adapted-from-superpowers-for-zai
   version: 1.0.0
 ---
 # Verification Before Completion

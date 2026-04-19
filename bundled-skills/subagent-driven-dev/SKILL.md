@@ -1,5 +1,5 @@
 ---
-name: subagent-driven-development
+name: subagent-driven-dev
 description: >
   Task dispatch and multi-stage review framework for delegating implementation work to Z.ai
   subagents via the Task tool. Use whenever a non-trivial engineering task benefits from bounded
@@ -10,7 +10,7 @@ description: >
   verification, and catches integration issues before closure.
 metadata:
   category: delegation
-  origin: adapted-for-zai
+  origin: adapted-from-superpowers-for-zai
   version: 1.0.0
 ---
 # Subagent-Driven Development
