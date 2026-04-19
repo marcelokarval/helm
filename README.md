@@ -1,5 +1,11 @@
 # Helm
 
+> Engineering orchestration for the Z.ai platform — the accelerate methodology, adapted.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/marcelokarval/helm/main/install.sh | bash
+```
+
 `helm` is the root orchestration skill for engineering work in the
 standalone platform and its supported project distributions.
 
@@ -136,7 +142,7 @@ When hardening is active, the run should visibly expose:
 
 See:
 
-- [prompt-hardening.md](./core/hardening/prompt-hardening.md)
+- [hardening/README.md](./core/hardening/README.md) (delegates to native `prompt-hardening` skill)
 
 ## Issue-Driven Mutation Stack
 
